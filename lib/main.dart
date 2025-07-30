@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:voting_result/firebase_options.dart';
 
 void main() async {
@@ -49,35 +50,92 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final cardHeight = screenHeight * 0.6;
+
     return Scaffold(
-        backgroundColor: Colors.white,
-        body: StreamBuilder<Map<String, int>>(
-          stream: getVoteCounts(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData)
-              return const Center(child: CircularProgressIndicator());
-            final data = snapshot.data!;
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+      backgroundColor: Colors.white,
+      body: StreamBuilder<Map<String, int>>(
+        stream: getVoteCounts(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData)
+            return const Center(child: CircularProgressIndicator());
+          final data = snapshot.data!;
+          return Padding(
+            padding: const EdgeInsets.all(60),
+            child: Column(
               children: [
-                resultTile("👍 Like", data['like']!),
-                resultTile("👎 Dislike", data['dislike']!),
-                resultTile("🤔 Hold", data['hold']!),
-                const SizedBox(height: 20),
-                Text("총 투표자 수: ${data.values.reduce((a, b) => a + b)}",
-                    style: const TextStyle(fontSize: 18)),
+                Text("Total: ${data.values.reduce((a, b) => a + b)}",
+                    style: GoogleFonts.notoSans(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    )),
+                const SizedBox(height: 40),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                          child: resultTile("assets/images/1f44d.png Yes!",
+                              data['like']!, cardHeight)),
+                      const SizedBox(
+                        width: 36,
+                      ),
+                      Expanded(
+                          child: resultTile("assets/images/1f914.png Hmmm..",
+                              data['hold']!, cardHeight)),
+                      const SizedBox(
+                        width: 36,
+                      ),
+                      Expanded(
+                          child: resultTile("assets/images/1f44e.png Nope",
+                              data['dislike']!, cardHeight)),
+                    ],
+                  ),
+                ),
               ],
-            );
-          },
-        ));
+            ),
+          );
+        },
+      ),
+    );
   }
 
-  Widget resultTile(String label, int count) {
+  Widget resultTile(String label, int count, double cardHeight) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-      child: ListTile(
-        title: Text(label, style: const TextStyle(fontSize: 22)),
-        trailing: Text('$count명', style: const TextStyle(fontSize: 22)),
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey[300]!, width: 2),
+      ),
+      child: Container(
+        height: cardHeight,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(label.split(" ").first),
+            const SizedBox(height: 12),
+            Text(
+              '$count',
+              style: GoogleFonts.notoSans(
+                fontSize: 48,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label.split(" ").last,
+              style: GoogleFonts.notoSans(
+                fontSize: 28,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
